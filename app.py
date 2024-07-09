@@ -3,6 +3,7 @@ import requests
 import csv
 import os
 from dotenv import load_dotenv
+import concurrent.futures
 
 app = Flask(__name__)
 
@@ -20,6 +21,18 @@ def log_query(query_params):
             writer.writeheader()  # file doesn't exist yet, write a header
         writer.writerow({'query': query_params})
 
+def fetch_pokemon_data(pokemon):
+    try:
+        pokemon_data = requests.get(pokemon['url']).json()
+        return {
+            'name': pokemon['name'],
+            'url': pokemon['url'],
+            'stats': {stat['stat']['name']: stat['base_stat'] for stat in pokemon_data['stats']}
+        }
+    except requests.exceptions.RequestException as e:
+        app.logger.error('Error fetching data for %s: %s', pokemon['name'], e)
+        return None
+
 @app.route('/pokemon', methods=['GET'])
 def get_pokemon():
     """
@@ -30,14 +43,12 @@ def get_pokemon():
         response = requests.get(f"{POKEAPI_URL}?limit=20")
         response.raise_for_status()
         data = response.json()
-        pokemon_list = []
-        for pokemon in data['results']:
-            pokemon_data = requests.get(pokemon['url']).json()
-            pokemon_list.append({
-                'name': pokemon['name'],
-                'url': pokemon['url'],
-                'stats': {stat['stat']['name']: stat['base_stat'] for stat in pokemon_data['stats']}
-            })
+
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            pokemon_list = list(executor.map(fetch_pokemon_data, data['results']))
+
+        # Remove any None values in case of request failures
+        pokemon_list = [pokemon for pokemon in pokemon_list if pokemon is not None]
 
         log_query(request.args)
         return jsonify(pokemon_list)
