@@ -33,21 +33,8 @@ This repository contains the source code and infrastructure configuration for th
    ```sh
    git clone https://github.com/segalzeyalz/flask-pokemon-app.git
    cd flask-pokemon-app
-Set up Google Cloud credentials:
 
-Create a GCP project and download the credentials.json file.
-Add credentials.json to your repository secrets in GitHub as GCP_CREDENTIALS.
-Add your Kubernetes kubeconfig file content encoded in base64 to your repository secrets in GitHub as KUBECONFIG_DATA.
-Configure Docker credentials:
-
-Add your DockerHub username and password to your repository secrets in GitHub as DOCKER_USERNAME and DOCKER_PASSWORD.
-Run the GitHub Actions workflow:
-
-Push your changes to the master branch or open a pull request to trigger the CI/CD pipeline.
-CI/CD Pipeline
-The CI/CD pipeline defined in .github/workflows/ci-cd-pipeline.yml automates the following steps:
-
-Build Job:
+## Build Job:
 
 Checks out the code.
 Sets up Docker Buildx.
@@ -95,13 +82,11 @@ To run the Flask application locally, use the following commands:
 
 Build the Docker image:
 
-sh
-Copy code
-docker build -t flask-pokemon-app:latest .
+'''sh
+docker build -t flask-pokemon-app:latest .'''
 Run the Docker container:
 
-sh
-Copy code
-docker run -p 5000:5000 flask-pokemon-app:latest
+'''sh
+docker run -p 5000:5000 flask-pokemon-app:latest'''
 Access the application:
 Open your web browser and navigate to http://localhost:5000.
