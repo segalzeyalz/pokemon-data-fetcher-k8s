@@ -57,3 +57,4 @@ jobs:
         kubectl apply -f k8s/server-deployment.yaml
         kubectl apply -f k8s/server-service.yaml
         kubectl apply -f k8s/hpa.yaml
+        kubectl apply -f k8s/grafana-deployment.yaml
