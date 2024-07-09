@@ -66,3 +66,4 @@ jobs:
         kubectl apply -f k8s/server-deployment.yaml --validate=false
         kubectl apply -f k8s/server-service.yaml --validate=false
         kubectl apply -f k8s/hpa.yaml --validate=false
+        kubectl apply -f k8s/grafana-deployment.yaml --validate=falseg
