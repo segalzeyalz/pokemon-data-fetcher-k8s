@@ -30,7 +30,7 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: username/flask-pokemon-app:latest
+        tags: eyalsegaldev/flask-pokemon-app:latest
 
   deploy:
     needs: build

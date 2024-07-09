@@ -1,13 +1,15 @@
-apiVersion: autoscaling/v1
-kind: HorizontalPodAutoscaler
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
 metadata:
-  name: server-hpa
+  name: server-scaledobject
   namespace: default
 spec:
   scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
     name: server-deployment
-  minReplicas: 1
-  maxReplicas: 5
-  targetCPUUtilizationPercentage: 70
+  minReplicaCount: 1
+  maxReplicaCount: 5
+  triggers:
+  - type: cpu
+    metadata:
+      type: Utilization
+      value: "70"

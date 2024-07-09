@@ -4,8 +4,25 @@ import csv
 import os
 from dotenv import load_dotenv
 import concurrent.futures
+from prometheus_flask_exporter import PrometheusMetrics
+
 
 app = Flask(__name__)
+metrics = PrometheusMetrics(app)
+
+# Define custom metrics
+pokemon_requests = metrics.counter(
+    'pokemon_requests_total', 'Number of requests to the /pokemon endpoint'
+)
+# app.py - Example addition for Prometheus metrics
+from prometheus_flask_exporter import PrometheusMetrics
+metrics = PrometheusMetrics(app)
+
+# Flask route to expose metrics
+@app.route('/metrics')
+def metrics():
+    return metrics.generate_latest()
+
 
 # Load environment variables from .env file
 load_dotenv()
@@ -19,8 +36,9 @@ def log_query(query_params):
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         if not file_exists:
             writer.writeheader()  # file doesn't exist yet, write a header
-        writer.writerow({'query': query_params})
+        writer.writerow({'query': str(query_params)})
 
+@pokemon_requests.count_exceptions()
 def fetch_pokemon_data(pokemon):
     try:
         pokemon_data = requests.get(pokemon['url']).json()
