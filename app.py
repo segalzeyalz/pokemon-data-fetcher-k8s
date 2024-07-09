@@ -6,7 +6,6 @@ from dotenv import load_dotenv
 import concurrent.futures
 from prometheus_flask_exporter import PrometheusMetrics
 
-
 app = Flask(__name__)
 metrics = PrometheusMetrics(app)
 
@@ -14,15 +13,6 @@ metrics = PrometheusMetrics(app)
 pokemon_requests = metrics.counter(
     'pokemon_requests_total', 'Number of requests to the /pokemon endpoint'
 )
-# app.py - Example addition for Prometheus metrics
-from prometheus_flask_exporter import PrometheusMetrics
-metrics = PrometheusMetrics(app)
-
-# Flask route to expose metrics
-@app.route('/metrics')
-def metrics():
-    return metrics.generate_latest()
-
 
 # Load environment variables from .env file
 load_dotenv()
@@ -38,7 +28,6 @@ def log_query(query_params):
             writer.writeheader()  # file doesn't exist yet, write a header
         writer.writerow({'query': str(query_params)})
 
-@pokemon_requests.count_exceptions()
 def fetch_pokemon_data(pokemon):
     try:
         pokemon_data = requests.get(pokemon['url']).json()
@@ -52,6 +41,7 @@ def fetch_pokemon_data(pokemon):
         return None
 
 @app.route('/pokemon', methods=['GET'])
+@pokemon_requests
 def get_pokemon():
     """
     Fetches a list of 20 pokemon from the PokeAPI
@@ -75,4 +65,6 @@ def get_pokemon():
         return jsonify({'error': 'Failed to fetch data'}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0")
+    # Set FLASK_DEBUG based on the environment variable DEBUG_METRICS
+    debug_metrics = os.getenv('DEBUG_METRICS', '0') == '1'
+    app.run(debug=debug_metrics, host="0.0.0.0", port=5000)
