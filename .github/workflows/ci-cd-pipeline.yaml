@@ -60,12 +60,12 @@ jobs:
       run: echo "KUBECONFIG is set"
 
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v0.4.0
+      uses: google-github-actions/auth@v1
       with:
         credentials_json: ${{ secrets.GCP_CREDENTIALS }}
 
     - name: Configure gcloud CLI
-      uses: google-github-actions/setup-gcloud@v0.2.0
+      uses: google-github-actions/setup-gcloud@v1
       with:
         project_id: "flask-pokemon-app"
         export_default_credentials: true
