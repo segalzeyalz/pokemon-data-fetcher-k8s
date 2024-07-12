@@ -1,5 +1,10 @@
-flask
-requests
-python-dotenv
-prometheus_flask_exporter
-python-logstash
+Flask==2.0.2
+requests==2.26.0
+prometheus-flask-exporter==0.18.1
+python-dotenv==0.19.2
+opentelemetry-api==1.4.1
+opentelemetry-sdk==1.4.1
+opentelemetry-instrumentation-flask==0.25b0
+opentelemetry-instrumentation-requests==0.25b0
+opentelemetry-exporter-otlp-proto-grpc==1.4.1
+python-logstash==0.4.6

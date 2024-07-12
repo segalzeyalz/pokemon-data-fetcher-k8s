@@ -1,70 +1,32 @@
-from flask import Flask, jsonify, request
-import requests
-import csv
-import os
-from dotenv import load_dotenv
-import concurrent.futures
-from prometheus_flask_exporter import PrometheusMetrics
+from flask import Flask
+from config import Config
+from controllers.pokemon_controller import create_pokemon_blueprint
+from utils.logging import setup_logging
+from utils.metrics import setup_metrics
+from utils.tracing import setup_tracing
+from services.pokemon_service import PokemonService
 
-app = Flask(__name__)
-metrics = PrometheusMetrics(app)
+def create_app():
+    app = Flask(__name__)
+    app.config.from_object(Config)
 
-# Define custom metrics
-pokemon_requests = metrics.counter(
-    'pokemon_requests_total', 'Number of requests to the /pokemon endpoint'
-)
+    # Setup logging
+    setup_logging(app)
 
-# Load environment variables from .env file
-load_dotenv()
-POKEAPI_URL = os.getenv('POKEAPI_URL')
-LOG_FILE_PATH = 'queries.csv'
+    # Setup metrics
+    setup_metrics(app)
 
-def log_query(query_params):
-    file_exists = os.path.isfile(LOG_FILE_PATH)
-    with open(LOG_FILE_PATH, 'a', newline='') as csvfile:
-        fieldnames = ['query']
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        if not file_exists:
-            writer.writeheader()  # file doesn't exist yet, write a header
-        writer.writerow({'query': str(query_params)})
+    # Setup tracing
+    setup_tracing(app)
 
-def fetch_pokemon_data(pokemon):
-    try:
-        pokemon_data = requests.get(pokemon['url']).json()
-        return {
-            'name': pokemon['name'],
-            'url': pokemon['url'],
-            'stats': {stat['stat']['name']: stat['base_stat'] for stat in pokemon_data['stats']}
-        }
-    except requests.exceptions.RequestException as e:
-        app.logger.error('Error fetching data for %s: %s', pokemon['name'], e)
-        return None
+    # Initialize the PokemonService with app config and logger
+    pokemon_service = PokemonService(app.config['POKEAPI_URL'], app.config['LOG_FILE_PATH'], app.logger)
 
-@app.route('/pokemon', methods=['GET'])
-@pokemon_requests
-def get_pokemon():
-    """
-    Fetches a list of 20 pokemon from the PokeAPI
-    :return:
-    """
-    try:
-        response = requests.get(f"{POKEAPI_URL}?limit=20")
-        response.raise_for_status()
-        data = response.json()
+    # Register blueprints
+    app.register_blueprint(create_pokemon_blueprint(pokemon_service))
 
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            pokemon_list = list(executor.map(fetch_pokemon_data, data['results']))
-
-        # Remove any None values in case of request failures
-        pokemon_list = [pokemon for pokemon in pokemon_list if pokemon is not None]
-
-        log_query(request.args)
-        return jsonify(pokemon_list)
-    except requests.exceptions.RequestException as e:
-        app.logger.error('Error fetching data: %s', e)
-        return jsonify({'error': 'Failed to fetch data'}), 500
+    return app
 
 if __name__ == '__main__':
-    # Set FLASK_DEBUG based on the environment variable DEBUG_METRICS
-    debug_metrics = os.getenv('DEBUG_METRICS', '0') == '1'
-    app.run(debug=debug_metrics, host="0.0.0.0", port=5000)
+    app = create_app()
+    app.run(debug=app.config['DEBUG'], host="0.0.0.0", port=5000)
