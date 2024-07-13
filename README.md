@@ -72,6 +72,12 @@ This repository contains the source code and infrastructure configuration for th
 2. **Access the Kibana dashboard:**
    ```sh 
    kubectl port-forward svc/kibana 5601:5601
+   
+to see logs need to define the fluentd there,
+for that do as in the following screens:
+![img.png](img.png)
+
+![img_1.png](img_1.png) 
 3. **Access the Prometheus dashboard:**
    ```sh
    kubectl port-forward svc/prometheus 9090:9090
