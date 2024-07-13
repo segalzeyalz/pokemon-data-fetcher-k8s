@@ -62,16 +62,16 @@ jobs:
     - name: Install jq
       run: sudo apt-get install -y jq
 
-    - name: Parse GCP Credentials
+    - name: Parse and Set GCP Credentials
       id: parse-credentials
-      run: |
-        echo "${{ secrets.GCP_CREDENTIALS }}" | jq '.' > gcp_credentials.json
-        echo "::set-output name=credentials::$(cat gcp_credentials.json)"
+      run: echo "${{ secrets.GCP_CREDENTIALS }}" | jq '.' > gcp_credentials.json
+      env:
+        GCP_CREDENTIALS_JSON: ${{ secrets.GCP_CREDENTIALS }}
 
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v1
       with:
-        credentials_json: ${{ steps.parse-credentials.outputs.credentials }}
+        credentials_json: ${{ env.GCP_CREDENTIALS_JSON }}
 
     - name: Configure gcloud CLI
       uses: google-github-actions/setup-gcloud@v1
