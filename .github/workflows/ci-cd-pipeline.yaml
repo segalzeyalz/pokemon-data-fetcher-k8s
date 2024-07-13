@@ -59,10 +59,18 @@ jobs:
         KUBECONFIG: $HOME/.kube/config
       run: echo "KUBECONFIG is set"
 
+    - name: Install jq
+      run: sudo apt-get install -y jq
+
+    - name: Parse GCP Credentials
+      id: parse-credentials
+      run: |
+        echo "${{ secrets.GCP_CREDENTIALS }}" | jq '.' > gcp_credentials.json
+
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v1
       with:
-        credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+        credentials_json: ${{ steps.parse-credentials.outputs.json }}
 
     - name: Configure gcloud CLI
       uses: google-github-actions/setup-gcloud@v1
