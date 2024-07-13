@@ -106,3 +106,4 @@ app.log
 # CSV Files
 queries.csv
 .idea
+infra/cred.json
