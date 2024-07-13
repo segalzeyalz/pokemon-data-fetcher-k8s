@@ -66,11 +66,12 @@ jobs:
       id: parse-credentials
       run: |
         echo "${{ secrets.GCP_CREDENTIALS }}" | jq '.' > gcp_credentials.json
+        echo "::set-output name=credentials::$(cat gcp_credentials.json)"
 
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v1
       with:
-        credentials_json: ${{ steps.parse-credentials.outputs.json }}
+        credentials_json: ${{ steps.parse-credentials.outputs.credentials }}
 
     - name: Configure gcloud CLI
       uses: google-github-actions/setup-gcloud@v1
