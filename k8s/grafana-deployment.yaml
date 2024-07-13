@@ -15,26 +15,23 @@ spec:
         app: grafana
     spec:
       containers:
-      - name: grafana
-        image: grafana/grafana:7.5.2
-        ports:
-        - containerPort: 3000
-        volumeMounts:
-        - name: grafana-storage
-          mountPath: /var/lib/grafana
-        - name: grafana-dashboards
-          mountPath: /var/lib/grafana/dashboards
-        env:
-        - name: GF_SECURITY_ADMIN_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: grafana-admin-credentials
-              key: admin-password
-        - name: GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH
-          value: "/var/lib/grafana/dashboards/pokemon-app-dashboard.json"
+        - name: grafana
+          image: grafana/grafana:7.5.2
+          ports:
+            - containerPort: 3000
+          volumeMounts:
+            - name: grafana-storage
+              mountPath: /var/lib/grafana
+            - name: grafana-dashboards
+              mountPath: /var/lib/grafana/dashboards
+          env:
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              value: "admin"
+            - name: GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH
+              value: "/var/lib/grafana/dashboards/pokemon-app-dashboard.json"
       volumes:
-      - name: grafana-storage
-        emptyDir: {}
-      - name: grafana-dashboards
-        configMap:
-          name: grafana-dashboards
+        - name: grafana-storage
+          emptyDir: {}
+        - name: grafana-dashboards
+          configMap:
+            name: grafana-dashboards

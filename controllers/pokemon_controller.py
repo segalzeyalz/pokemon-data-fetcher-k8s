@@ -16,7 +16,8 @@ def create_pokemon_blueprint(pokemon_service):
 
         try:
             pokemon_list = pokemon_service.get_pokemon()
-            pokemon_service.log_query(request.args)
+            # Log the query parameters and response
+            pokemon_service.log_query(request.args, pokemon_list)
             return jsonify(pokemon_list)
         except Exception as e:
             current_app.logger.error('Error fetching data: %s', e)
